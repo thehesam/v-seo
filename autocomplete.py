@@ -3,7 +3,7 @@ import pandas as pd
 import time
 
 #config
-rootQuery = ['بازی کامپیوتر']
+rootQuery = ['قهوه ترک']
 region = 'fa'
 lang = 'ir'
 loop_depth = 3

@@ -1,16 +1,14 @@
-import requests
-import json
-import string
-import pandas as pd
+import requests 
+import json 
+import string 
+import pandas as pd 
 import time
 
-#config
 rootQuery = ['قهوه ترک']
 region = 'fa'
 lang = 'ir'
 loop_depth = 3
 alphabet = ['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج','چ','پ','ش','س','ی','ب','ل','ا','ت','ن','م','ک','گ','ظ','ط','ز','ر','ذ','د','و','.',' ','چرا','چطور','چگونه','از کجا','کدام','روش','نحوه','خرید','قیمت','آموزش']
-
 
 kwdataframe = pd.DataFrame(columns=['Keywords'])
 
@@ -18,13 +16,12 @@ def apicall(query='', cp=None, hl='fa', gl='ir'):
     url = f"https://www.google.com/complete/search?q={query}&cp={cp}&client=chrome&hl={hl}-{gl}"
     res = requests.get(url=url)
     return res
-    
+
 def apicallUrl(url):
     res = requests.get(url=url)
-    return res     
+    return res
 
-
-#thread options
+#thread options 
 import concurrent
 from concurrent.futures import ThreadPoolExecutor
 threads = 20
@@ -42,8 +39,8 @@ for i in range(0,loop_depth):
         with ThreadPoolExecutor(max_workers=threads) as executor:
             future_to_url = {executor.submit(apicall, kw,item,lang,region) for item in spaces}
             for future in concurrent.futures.as_completed(future_to_url):
-                response = future.result()
                 try:
+                    response = future.result()
                     results = response.json()[1]
                     tdf = pd.DataFrame(results, columns=['Keywords'])
                     kwdataframe = pd.concat([kwdataframe, tdf], ignore_index=True, sort=False)
@@ -53,11 +50,8 @@ for i in range(0,loop_depth):
                         mainList.append(res)
 
                 except Exception as e:
-                    if response.status_code != 200:
-                        print('error! your ip probably blocked')
-                        exit()
-                    else:
-                        print('Looks like something went wrong:', e)
+                    print('Looks like something went wrong:', e)
+                    response.status_code
         #suggest links generate
         urllist = []
         for atoz in alphabet:
@@ -81,8 +75,8 @@ for i in range(0,loop_depth):
         with ThreadPoolExecutor(max_workers=threads) as executor:
             future_to_url = {executor.submit(apicallUrl, urltoget) for urltoget in urllist}
             for future in concurrent.futures.as_completed(future_to_url):
-                response = future.result()
                 try:
+                    response = future.result()
                     results = response.json()[1]
                     tdf = pd.DataFrame(results, columns=['Keywords'])
                     kwdataframe = pd.concat([kwdataframe, tdf], ignore_index=True, sort=False)
@@ -91,11 +85,8 @@ for i in range(0,loop_depth):
                     for res in results:
                         mainList.append(res)
                 except Exception as e:
-                    if response.status_code != 200:
-                        print('error! your ip probably blocked')
-                        exit()
-                    else:
-                        print('Looks like something went wrong:', e)
+                    print('Looks like something went wrong:', e)
+                    response.status_code
         print('sleeping')
         time.sleep(20)
     query_dict[i]['suggests'] = suggestlist
